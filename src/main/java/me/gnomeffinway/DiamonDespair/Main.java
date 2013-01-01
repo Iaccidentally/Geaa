@@ -5,14 +5,13 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-
+import org.bukkit.ChatColor;
+import org.bukkit.Material;
+import org.bukkit.block.Block;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
-import org.bukkit.ChatColor;
-import org.bukkit.Material;
-import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -26,17 +25,18 @@ import org.bukkit.plugin.java.JavaPlugin;
  * 
  * Replaces a block with another upon being broken, as specified in the config.yml file.
  * 
- * @author GnomeffinWay
+ * @author GnomeffinWay, Maven conversion by Iaccidentally
  */
 
 public class Main extends JavaPlugin implements Listener{
 	
 	public static Main plugin;
-	public final Logger logger=Logger.getLogger("Minecraft");
+	public static final Logger logger=Logger.getLogger("Minecraft");
 	private FileConfiguration customConfig = null;
 	private File customConfigFile = null;
 	
 	// Plugin enable operations
+        @Override
 	public void onEnable(){
 		getServer().getPluginManager().registerEvents(this,this);
 		getConfig().options().copyDefaults(true);
@@ -44,6 +44,7 @@ public class Main extends JavaPlugin implements Listener{
 	}
 	
 	// Plugin disable operations
+        @Override
 	public void onDisable(){
 	}
 		
@@ -61,13 +62,13 @@ public class Main extends JavaPlugin implements Listener{
 		
 		//Seeing if activator or replacement values are items instead of blocks
 		if(actID>=255){
-			this.logger.info("[DiaD] Error: Activator field not valid [not a block ID]");
+			Main.logger.info("[DiaD] Error: Activator field not valid [not a block ID]");
 			getServer().getPluginManager().disablePlugin(this);
 			return;
 		}
 		
 		if(repID>=255){
-			this.logger.info("[DiaD] Error: Replacement field not valid [not a block ID]");
+			Main.logger.info("[DiaD] Error: Replacement field not valid [not a block ID]");
 			getServer().getPluginManager().disablePlugin(this);
 			return;
 		}
@@ -77,7 +78,7 @@ public class Main extends JavaPlugin implements Listener{
 			activator=Material.getMaterial(actID);
 		}
 		catch(Exception e){
-			this.logger.info("[DiaD] Error: Activator field not valid");
+			Main.logger.info("[DiaD] Error: Activator field not valid");
 			getServer().getPluginManager().disablePlugin(this);
 			return;
 		}
@@ -87,23 +88,26 @@ public class Main extends JavaPlugin implements Listener{
 			replacement=Material.getMaterial(repID);
 		}
 		catch(Exception e){
-			this.logger.info("[DiaD] Error: Replacement field not valid");
+			Main.logger.info("[DiaD] Error: Replacement field not valid");
 			getServer().getPluginManager().disablePlugin(this);
 			return;
 		}
 		
 		// Checking if block is equal to activator; replacing block and sending player a message
 		if(mat.equals(activator) && (!(Boolean)getConfig().get("individual") || playerSearch(plr.getName()))){		
-			if(!(Boolean)getConfig().get("exp-drop"))
-				event.setExpToDrop(0);
+			if(!(Boolean)getConfig().get("exp-drop")) {
+                        event.setExpToDrop(0);
+                    }
 			block.setType(replacement);
-			if(!plr.hasMetadata("diad-warned"))
-				plr.sendMessage(ChatColor.RED+"That material is no longer mineable");
+			if(!plr.hasMetadata("diad-warned")) {
+                        plr.sendMessage(ChatColor.RED+"That material is no longer mineable");
+                    }
 			plr.setMetadata("diad-warned", new FixedMetadataValue(this,true));
 		}
 		
 	}
 	
+        @Override
 	public boolean onCommand(CommandSender sender, Command cmd, String commandLabel, String[] args){
 		if(cmd.getName().equalsIgnoreCase("diamondespair")){
 			sender.sendMessage(ChatColor.GOLD+"[DiaD] "+ChatColor.YELLOW+"Activator ID is "+getConfig().get("activator")+" and Replacement ID is "+getConfig().get("replacement"));
@@ -127,7 +131,7 @@ public class Main extends JavaPlugin implements Listener{
 			}
 			
 			if(activatorID>=255){
-				this.logger.info("[DiaD] Error: Activator field not valid [not a block ID]");
+				Main.logger.info("[DiaD] Error: Activator field not valid [not a block ID]");
 				return true;
 			}
 			
@@ -155,7 +159,7 @@ public class Main extends JavaPlugin implements Listener{
 			}
 			
 			if(replacementID>=255){
-				this.logger.info("[DiaD] Error: Replacement field not valid [not a block ID]");
+				Main.logger.info("[DiaD] Error: Replacement field not valid [not a block ID]");
 				getServer().getPluginManager().disablePlugin(this);
 				return true;
 			}
@@ -179,8 +183,9 @@ public class Main extends JavaPlugin implements Listener{
 			getCustomConfig().set(target.getName(),true);
 			saveCustomConfig();
 			sender.sendMessage(ChatColor.GOLD+"[DiaD] "+ChatColor.YELLOW+target.getName()+(" has been punished"));
-			if(target.isOnline())
-				target.sendMessage(ChatColor.RED+"Your pickaxe vibrates strangely.");
+			if(target.isOnline()) {
+                        target.sendMessage(ChatColor.RED+"Your pickaxe vibrates strangely.");
+                    }
 			return true;
 		}
 		
@@ -197,8 +202,9 @@ public class Main extends JavaPlugin implements Listener{
 			getCustomConfig().set(target.getName(),false);
 			saveCustomConfig();
 			sender.sendMessage(ChatColor.GOLD+"[DiaD] "+ChatColor.YELLOW+target.getName()+(" has been forgiven"));
-			if(target.isOnline())
-				target.sendMessage(ChatColor.RED+"Your pickaxe feels normal again.");
+			if(target.isOnline()) {
+                        target.sendMessage(ChatColor.RED+"Your pickaxe feels normal again.");
+                    }
 			return true;
 		}
 		return false;
@@ -219,10 +225,12 @@ public class Main extends JavaPlugin implements Listener{
 	}
 	
 	private boolean playerSearch(String name){
-		if(getCustomConfig().get(name)==null)
-			return false;
-		if(getCustomConfig().getBoolean(name))
-			return true;
+		if(getCustomConfig().get(name)==null) {
+                return false;
+            }
+		if(getCustomConfig().getBoolean(name)) {
+                return true;
+            }
 		return false;
 	}
 	
